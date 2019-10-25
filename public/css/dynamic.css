@@ -1,0 +1,10 @@
+:root {
+	--backgroundMain:#72b06f;
+	--textMain:#f4f8ff;
+	--backgroundHeader:#3f582c;
+	--textHeader:#edeffe;
+	--backgroundMenu:#658b54;
+	--textMenu:#ffffff;
+	--activeMenu:10px solid #076323;
+	--activeMenuBackground:#5aad8c;
+}
