@@ -34,4 +34,5 @@ import ContactDetials from './details/details-contact.jsx';
 import Modal from './modals/modal.jsx';
 import UserBanModal from './modals/modal-ban.jsx';
 import UserUnbanModal from './modals/modal-unban.jsx';
+import RoundModal from './modals/modal-round.jsx';
 import Paginator from './widgets/paginator.jsx';

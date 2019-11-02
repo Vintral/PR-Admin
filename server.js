@@ -3,6 +3,7 @@
 //==================================//
 var Logger = require( './logger' );
 const redis = require( 'redis' );
+var bcrypt = require( 'bcrypt' );
 var express = require( "express" );
 var app = express();
 var http = require('http').Server( app );
@@ -14,6 +15,7 @@ var session = require( "express-session" );
 //	Variables								//
 //==========================================//
 var port = 5523;
+let adminID = 0;
 
 //==========================================//
 //	Redis									//
@@ -78,7 +80,7 @@ function requiresSession( request, response ) {
 	return true;
 }
 
-app.use( express.static( 'public' ) );
+app.use( express.static( '/home/ec2-user/server/public' ) );
 app.use( cookies() );
 app.use( bodyParser.urlencoded( { extended: false } ) );
 app.use( bodyParser.json() );
@@ -142,7 +144,8 @@ app.get( "/dashboard/users/active", async function( request, response ) {
     if( requiresSession( request, response ) ) {
         //Logger.logAdmin( "Dashbord: Active Users" );
         
-        response.write( server.totalUsers + "" );
+	// TO DO
+        response.write( 0 + "" );
         response.end();
     }
 } );

@@ -12,13 +12,17 @@ export default class UsersPanel extends Panel {
 
 		this.type = "user";
 		
-		this.state = { items:[], url:"users", header:"Users", imagePath:"users", type:"online", class:"UsersPanel" };
+		this.state = { items:[], url:"users-online", header:"Users", imagePath:"users", type:"online", class:"UsersPanel" };
 		
 		this.timer = "";
+		this.searchTimer = "";
 		
 		this.onClick = this.onClick.bind( this );
 		this.onTick = this.onTick.bind( this );
 		this.onTab = this.onTab.bind( this );
+		this.onChange = this.onChange.bind( this );
+
+		this.request = "";
 	}
 
 	//==============================//
@@ -32,6 +36,14 @@ export default class UsersPanel extends Panel {
 	componentWillUnmount() {
 		super.componentWillUnmount();
 		this.stopTimer();
+	}
+
+	componentDidUpdate( prevProps, prevState, snapshot ) {
+		super.componentDidUpdate();
+
+		if( this.state.url !== prevState.url ) {
+			this.getData();
+		}
 	}
 
 	//==============================//
@@ -50,6 +62,19 @@ export default class UsersPanel extends Panel {
 		if( !node ) return;
 		
 		this.showSubset( node.dataset.type );
+	}
+
+	onSearch( e ) {
+		this.debug( "search" );
+	}
+
+	onChange( e ) {
+		this.debug( "onChange" );
+
+		const search = e.target.value;
+
+		if( this.searchTimer ) clearTimeout( this.searchTimer );
+		this.searchTimer = setTimeout( () => this.performSearch( search ), 1000 );
 	}
 	
 	//==============================//
@@ -70,14 +95,39 @@ export default class UsersPanel extends Panel {
 		this.setState( { type:type, loaded:false, items:[], url:url } );
 	}
 
+	performSearch( value ) {
+		this.debug( "performSearch: " + value );
+
+		const self = this;
+
+		this.searchTimer = "";
+		if( this.request ) this.request.abort();
+		this.request = $.ajax( {
+			url:"/users-search/" + value,
+			type:"get",
+			error:function( err ) {
+				console.log( err );
+				//window.location.replace( "login" );
+			},
+			success:function( data ) {
+				data = JSON.parse( data );
+				data = data.data;			
+				self.setState( { items: data } );
+
+				self.request = "";
+			}
+		} );	
+	}
+
 	//==============================//
 	//  Renderers					//
 	//==============================//
 	renderHeader() {
 		var style = { "position":"absolute", "right":"10px", "display":"inline-block" }
 		return <div className="panel header">
-			{this.props.header}
+			{this.state.header}
 			<div className="tabs" style={style}>
+				<input type="text" id="user-search" placeholder="Search For..." onChange={this.onChange} />
 				<div className="tab" data-type="online" onClick={this.onTab}>Online</div>
 				<div className="tab" data-type="all" onClick={this.onTab}>All</div>
 			</div>

@@ -12,15 +12,16 @@ html {
 }
 
 body {
-    color: var( --textMain );
+  color: var( --textMain );
 	background: var( --backgroundMain );
-    font-family: 'Lato', sans-serif;
-    padding: 0;
-    margin: 0;
-    font-size:14px;
-	padding-top:70px;
+	font-family: 'Lato', sans-serif;
+	padding: 0;
+	margin: 0;
+	font-size:14px;
 	height:100%;
 }
+
+ul { margin:0; }
 
 select {
 	background:rgba( 162, 220, 182, 0.7 );
@@ -48,13 +49,17 @@ textarea,input[type="text"],input[type="password"], input[type="number"] {
 }
 
 textarea:focus,input[type="text"]:focus,input[type="password"]:focus {
-  border: solid 1px #707070;
-  box-shadow: 0 0 5px 1px #969696;
+  border: solid 1px #707070;  
 }
 
 input[type="text"]::-webkit-input-placeholder,input[type="text"]::-moz-placeholder,input[type="text"]:-ms-input-placeholder ,input[type="text"]:-moz-placeholder {
   color: pink;
 }
+
+.login-container { display:flex; justify-content:center; align-items:center; height:100%; width:100%; }
+.login-wrap { display:flex; flex-direction:column; background:rgba(255,255,255,0); }
+
+#root { display:flex; }
 
 #overlay, #overlayModal {
 	background-color: rgba(0, 0, 0, 0.5);
@@ -64,7 +69,10 @@ input[type="text"]::-webkit-input-placeholder,input[type="text"]::-moz-placehold
 	z-index: 0;
 	height: 100%;
 	top: 0px;
-	opacity:0;	
+	opacity:0;
+	display:flex;
+	justify-content:center;
+	align-items:center;	
 }
 
 #overlay.active {
@@ -85,34 +93,26 @@ input[type="text"]::-webkit-input-placeholder,input[type="text"]::-moz-placehold
 
 .panel {
 	display:block;
+	margin-left:15vw;
 }
 
 #page.toggled {
 	padding-left:250px;
 }
 
-#menu {
-	z-index:1000;
-	position:fixed;
-	left:250px;
-	height:100%;
-	margin-left:-250px;
-	overflow-y:auto;
-	background:var( --backgroundMenu );
-	color:var( --textMenu );
-	box-shadow:1px 0px 10px black;
-	transition:all 0.5s ease;
-	width:0;
-	top:0;
+#menu {	
+	overflow-y:auto;	
+	transition:all 0.5s ease;	
 }
 
-#menu.toggled {
-	width:250px;
-}
+.navigation { display:inline-flex; flex-direction:column; justify-content:stretch; z-index:1000; width:15vw; position:fixed; height:100%; background:#700; background:var( --backgroundMenu ); color:var( --textMenu ); box-shadow:1px 0px 10px black; }
 
-.menu {
-	padding-left:0;
-}
+.menu { padding-left:0; flex-grow:1; }
+
+.logout { background:var( --backgroundMain ); font-size:24px; text-align:center; padding:1vw; cursor:pointer; }
+
+a { text-decoration:none; color:var( --textMain ); }
+
 
 .menu .menu-item {
 	display:block;
@@ -325,7 +325,7 @@ input[type="text"]::-webkit-input-placeholder,input[type="text"]::-moz-placehold
 	width:100%;
 }
 
-#content>.content .header, .panel.header, .details-header, .modal-header {
+#content>.content .header, .panel.header, .details-header {
 	background:var( --backgroundHeader );
 	line-height:40px;
 	padding-left:1%;
@@ -335,6 +335,27 @@ input[type="text"]::-webkit-input-placeholder,input[type="text"]::-moz-placehold
 	top:0;
 	width:inherit;
 	color:var( --textHeader );
+}
+
+.modal-header {
+	box-shadow:0px 2px 5px black;
+	color:var( --textHeader );
+	background:var( --backgroundHeader );
+	display:flex;
+	font-size:20px;
+	border-bottom:0;
+	align-items:center;
+}
+
+.modal-header .label {
+	flex-grow:1;
+	padding:.25vw .5vw;
+}
+
+.modal-header .close {
+	cursor:pointer;
+	font-size:30px;
+	padding-right:.5vw;
 }
 
 .round-header {
@@ -1036,16 +1057,9 @@ div.paginator .page.active {
 	color:rgba( 255, 255, 0, 0.9 );
 }
 
-.modal, .detail {
-	position:fixed;
-	left: 50%;	
+.modal, .detail {	
 	background: var( --backgroundMain );	
 	transition: all 150ms;
-}
-
-.modal {
-	transform: translate(-50%, -50%);
-	top: 50%;
 }
 
 .detail { 
@@ -1065,17 +1079,8 @@ div.paginator .page.active {
 
 .modal {
 	z-index:10001;
-	display:block;
-}
-
-.modal-ban {
-	width:300px;
-	height:200px;
-}
-
-.modal-unban {
-	width:300px;
-	height:140px;
+	display:flex;
+	flex-direction:column;
 }
 
 .unban-text {
@@ -1085,7 +1090,7 @@ div.paginator .page.active {
 
 .detail-appear, .modal-appear {
 	opacity: 0;
-	transform: translate(-50%, -50%) scale( 0.7 );
+	transform: scale( 0.7 );
 }
 
 .detail-enter-done, .modal-enter-done {
@@ -1093,18 +1098,11 @@ div.paginator .page.active {
 }
 
 .modal-enter-done {
-	transform: translate(-50%, -50%) scale( 1.0 );
+	transform: scale( 1.0 );
 }
 
 .detail-enter-done {
 	transform: translateX( -50% ) scale(1.0);
-}
-
-.modal-header {
-	font-size:20px;
-	line-height:0;
-	position:static;
-	border-bottom:0;
 }
 
 .modal .buttons {
@@ -1129,121 +1127,13 @@ div.paginator .page.active {
 	margin-bottom:10px;
 }
 
-.modal-content-area input {
-	width:170px;
-	margin-right:10px;
-	padding:0;
+.modal-content-area input {	
+	padding:.25vw;
+	margin-bottom:.25vw;
 	display:inline-block;
 }
 
 .modal-content-area select {
 	width:100px;
 	height:26px;
-}
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    /* display: none; <- Crashes Chrome on hover */
-    -webkit-appearance: none;
-    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
-}
-
-input[type=number] {
-    -moz-appearance:textfield; /* Firefox */
-}
-
-@media ( min-width:768px ) {
-	body {
-		padding-top:0;
-	}
-
-	#header {
-		display:none;
-	}
-
-	.navbar-text {
-		margin-left:40px;
-	}
-
-	#page,.panel {
-		margin-left:15%;
-	}
-
-	#menu {
-		width:20%;
-	}
-
-	a.button.logout {
-		display:block;
-	}
-
-	.inner-content .field .label {
-		line-height:35px;
-		font-size:20px;
-		width:250px;
-	}
-
-	.details {
-		right:-50%;
-		width:50%;
-	}
-
-	.details>.header {
-		width:50%;
-	}
-
-	#content>.content>.inner-content {
-		padding:30px 20px;
-	}
-
-	#content>.content {
-		padding-top:30px;
-	}
-}
-
-@media ( min-width:992px ) {
-	.inner-content .field .label {
-		line-height:35px;
-		font-size:30px;
-		width:380px;
-	}
-
-	.details {
-		right:-30%;
-		width:30%;
-	}
-
-	.details>.header {
-		width:30%;
-	}
-
-	.sub-header {
-		padding-left:1%;
-	}
-	
-	#menu { width:20%; }
-}
-
-@media ( min-width:1280px ) {
-	#menu { width:15%; }
-}
-
-/* width */
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-  background: #f1f1f1; 
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #888; 
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: #555; 
 }

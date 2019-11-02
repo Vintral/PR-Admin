@@ -105,7 +105,7 @@ export default class Panel extends React.Component {
 	}
 
 	//==============================//
-	//  Renderers					//
+	//  Renderers										//
 	//==============================//
 	renderHeader() {
 		this.debug( "renderHeader" );

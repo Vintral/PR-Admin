@@ -9,7 +9,7 @@ export default class Modal extends React.Component {
 		super( props );
 		
 		this._debug = false;
-        this._class = "Modal";
+    this._class = "Modal";
 					
 		this.state = { headerText:"" };
 	}
@@ -40,7 +40,8 @@ export default class Modal extends React.Component {
 		this.debug( "renderHeader" );
 		
 		return <div className="modal-header">
-			{ this.state.headerText }
+			<div className="label">{ this.state.headerText }</div>
+			<div className="close" onClick={this.onCancel}>&times;</div>
 		</div>
 	}
 	

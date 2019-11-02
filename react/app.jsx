@@ -26,12 +26,14 @@ import ContactDetails from './details/details-contact.jsx';
 
 import BanUserModal from './modals/modal-ban.jsx';
 import UnbanUserModal from './modals/modal-unban.jsx';
+import RoundModal from './modals/modal-round.jsx';
+
 import DupesPanel from './panels/dupes.jsx';
 import ContactsPanel from './panels/contacts.jsx';
  
 class App extends React.Component {
 	//==============================//
-	//  Constructor					//
+	//  Constructor									//
 	//==============================//
 	constructor( props ) {
 		super( props );
@@ -60,7 +62,7 @@ class App extends React.Component {
 	}
 
 	//==============================//
-	//  Event Handlers				//
+	//  Event Handlers							//
 	//==============================//
 	onNavigationChange( e ) {
 		this.debug( "onNavigationChange" );
@@ -74,7 +76,11 @@ class App extends React.Component {
 	
 	onAdd( e ) {
 		this.debug( "onAdd: " + e.type );
-		this.setState( { overlay:true, type:e.type, item:"add" } );
+
+		switch( e.type ) {
+			case "round": this.setState( { modalOverlay:true, modal:"round" } ); break;
+			default: this.setState( { overlay:true, type:e.type, item:"add" } ); break;
+		}
 	}
 	
 	onClick( e ) {
@@ -126,7 +132,7 @@ class App extends React.Component {
 	}
 
 	//==============================//
-	//  Renderers					//
+	//  Renderers										//
 	//==============================//
 	renderPanel() {
 		this.debug( "renderPanel" );
@@ -134,7 +140,7 @@ class App extends React.Component {
 		switch( this.state.panel ) {
 			case "Stats": return <StatsPanel />;
 			case "Users": return <UsersPanel onItem={this.onItem} />;
-			case "Rounds": return <RoundsPanel onItem={this.onItem} />;
+			case "Rounds": return <RoundsPanel onItem={this.onItem} onAdd={this.onAdd} />;
 			case "Units": return <UnitsPanel onItem={this.onItem} />
 			case "Buildings": return <BuildingsPanel onItem={this.onItem} onAdd={this.onAdd} />;
 			case "Items": return <ItemsPanel onItem={this.onItem} onAdd={this.onAdd} />;
@@ -179,14 +185,6 @@ class App extends React.Component {
 		return <NavigationMenu update={this.state.updateMenu} onMenuUpdated={this.onMenuUpdated} onChanged={this.onNavigationChange} />;
 	}
 
-	renderModalOverlay() {
-		if( !this.state.modalOverlay ) return "";
-
-		return (
-			<div id="overlayModal">&nbsp;</div>
-		);
-	}
-
 	renderModal() {
 		const { modal } = this.state;
 		if( !modal ) return "";
@@ -194,23 +192,31 @@ class App extends React.Component {
 		console.log( "SHOW MODAL" );
 		console.log( this.state );
 
+		let m = "";
 		switch( modal ) {
-			case "ban": return <BanUserModal userid={this.state.modalData.id} username={this.state.modalData.name} closeModal={this.onCloseModal}/>;
-			case "unban": return <UnbanUserModal userid={this.state.modalData.id} username={this.state.modalData.name} closeModal={this.onCloseModal}/>;
+			case "ban": m = <BanUserModal userid={this.state.modalData.id} username={this.state.modalData.name} closeModal={this.onCloseModal}/>; break;
+			case "unban": m = <UnbanUserModal userid={this.state.modalData.id} username={this.state.modalData.name} closeModal={this.onCloseModal}/>; break;
+			case "round": m = <RoundModal closeModal={this.onCloseModal} />; break;
+			default: return "";
 		}
+
+		return (
+			<div id="overlayModal">
+				{m}
+			</div>
+		)
 	}
 
 	render() {
 		this.debug( "render" );
 		
-		return <div>
-			{this.renderOverlay()}
-			{this.renderModalOverlay()}
+		return <>
+			{this.renderOverlay()}			
 			{this.renderNavigation()}			
 			{this.renderPanel()}
 			{this.renderDetail()}
 			{this.renderModal()}
-		</div>
+		</>
 	}
 
 	//==============================//
