@@ -510,6 +510,27 @@ app.get( "/rounds", async function( request, response ) {
     }
 } );
 
+app.post( "/round", async (request, response ) => {
+    if( requiresSession( request, response ) ) {        
+        console.log( "POST ROUND DATA" );
+
+        console.log( request.body );
+
+        let { energyRegen, energyMax, gold, food, land, wood, stone, metal, length, recurring } = request.body;
+
+        let query = "INSERT INTO rounds SET energy = " + energyRegen + ", max_energy = " + energyMax + ", land = " + land + ", gold = " + gold + ", food = " + food + ", wood = " + wood + ", stone = " + stone + ", metal = " + metal + ", active = 1, expires = UNIX_TIMESTAMP() + " + ( length * 86400 ) + ", recurring = " + recurring + ", processed = 0, days = " + length;
+        let result = await database.execute( query );
+        if( result && result.affectedRows === 1 ) {
+            response.statusCode = 200;
+            response.end();
+        } else {
+            console.log( "ERROR Executing: " + query );
+            response.statusCode = 500;
+            response.end();
+        }
+    }
+} );
+
 app.get( "/round/:id", async function( request, response ) {
     var session = request.session;
     if( session && session.loggedIn ) {

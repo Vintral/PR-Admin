@@ -51,32 +51,31 @@ export default class RoundModal extends Modal {
     console.log( "Length: " + length );
     console.log( "Recurring: " + recurring );
 
-    /*const reason = document.getElementById( "ban-reason" ).value;
-    const amount = document.getElementById( "ban-amount" ).value;
-    const unit = document.getElementById( "ban-unit" ).value;
+    if( !energyRegen ) return;
+    if( !energyMax ) return;
+    if( !land ) return;
+    if( !gold ) return;
+    if( !food ) return;
+    if( !wood ) return;
+    if( !stone ) return;
+    if( !metal ) return;
+    if( !length ) return;
 
-    if( !reason ) return alert( "Missing Reason" );
-    if( !amount && unit !== "permanent" ) return alert( "Missing Duration" );
-    if( amount <= 0 && unit !== "permanent" ) return alert( "Invalid Duration" );
-
-    let packet = {};		
-    packet.reason = btoa( reason );
-        packet.amount = amount;
-        packet.unit = btoa( unit );
-
+    let packet = { energyRegen, energyMax, land, gold, food, wood, stone, metal, length, recurring };
+    
     let self = this;
     $.ajax( {
-      url: '/ban/' + this.state.userid,
+      url: '/round',
       type: 'POST',
       data: JSON.stringify( packet ),
       contentType: 'application/json',
       success: function( data ) {
         self.props.closeModal();
-            },
-            error: function( err ) {
-                alert( "Error Banning User" );
-            }
-    } );*/
+      }, 
+      error: function( err ) {
+          alert( "Error Creating Round" );
+      }
+    } );
   }
 
   onCancel( e ) {
