@@ -186,23 +186,25 @@ class App extends React.Component {
 	}
 
 	renderModal() {
-		const { modal } = this.state;
-		if( !modal ) return "";
+		const { modal:modalType } = this.state;
+		if( !modalType ) return "";
+
+		const { data } = this.state.modalData;
 
 		console.log( "SHOW MODAL" );
 		console.log( this.state );
 
-		let m = "";
-		switch( modal ) {
-			case "ban": m = <BanUserModal userid={this.state.modalData.id} username={this.state.modalData.name} closeModal={this.onCloseModal}/>; break;
-			case "unban": m = <UnbanUserModal userid={this.state.modalData.id} username={this.state.modalData.name} closeModal={this.onCloseModal}/>; break;
-			case "round": m = <RoundModal closeModal={this.onCloseModal} />; break;
+		let modal = "";
+		switch( modalType ) {
+			case "ban": modal = <BanUserModal userid={data.id} username={data.name} closeModal={this.onCloseModal}/>; break;
+			case "unban": modal = <UnbanUserModal userid={data.id} username={data.name} closeModal={this.onCloseModal}/>; break;
+			case "round": modal = <RoundModal closeModal={this.onCloseModal} />; break;
 			default: return "";
 		}
 
 		return (
 			<div id="overlayModal">
-				{m}
+				{modal}
 			</div>
 		)
 	}

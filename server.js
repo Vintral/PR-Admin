@@ -143,10 +143,13 @@ app.get( "/dashboard/users/new", async function( request, response ) {
 app.get( "/dashboard/users/active", async function( request, response ) {
     if( requiresSession( request, response ) ) {
         //Logger.logAdmin( "Dashbord: Active Users" );
-        
-	// TO DO
-        response.write( 0 + "" );
-        response.end();
+                                
+        redisClient.get( "NUM_USERS", ( err, res ) => { 
+            Logger.logAdmin( "CURRENT USERS: " + res ); 
+
+            response.write( res + "" );
+            response.end();
+        } );        
     }
 } );
 
@@ -1355,7 +1358,7 @@ app.get( '/', async function( request, response, next ) {
 
     var session = request.session;
     if( session && session.loggedIn ) {
-        response.sendFile( 'index.html', { root: __dirname } );
+        response.sendFile( 'index-react.html', { root: __dirname } );
     } else {
         response.redirect( '/login' );
     }

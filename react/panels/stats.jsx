@@ -19,7 +19,7 @@ export default class StatsPanel extends Panel {
 	renderContent() {
 		return <div>
 			<div>
-				<DashboardWidget header="Active Users" default="--" visible={this.props.visible} url="/dashboard/users/active" />
+				<DashboardWidget header="Active Users" default="--" visible={this.props.visible} url="/dashboard/users/active" refresh="1" />
 				<DashboardWidget header="New Users" default="--" visible={this.props.visible} url="/dashboard/users/new" refresh="60" />			
 				<DashboardWidget header="Daily Users" default="--" visible={this.props.visible} url="/dashboard/users/daily" refresh="60" />
 				<DashboardWidget header="Daily" default="0" visible={this.props.visible} url="/dashboard/revenue/daily" refresh="60" prefix="$" />

@@ -2,7 +2,7 @@ import React from 'react';
  
 export default class Panel extends React.Component {
 	//==============================//
-	//  Constructor					//
+	//  Constructor									//
 	//==============================//
 	constructor( props ) {
 		super( props );
@@ -10,14 +10,14 @@ export default class Panel extends React.Component {
 		this._debug = false;
 		this._class = "Panel";
 		
-		this.type = "generic";			
-		
+		this.type = "generic";
+
 		this.onClick = this.onClick.bind( this );
 		this.onAdd = this.onAdd.bind( this );
 	}
 
 	//==============================//
-	//  Life Cycle					//
+	//  Life Cycle									//
 	//==============================//
 	componentDidMount() {
 		this.debug( "componentDidMount" );					
@@ -61,9 +61,12 @@ export default class Panel extends React.Component {
 	}
 	
 	onClick( e ) {
+		console.log( "onClick" );
 		this.debug( "onClick" );
 		
 		var node = e.target;
+
+		console.log( node );
 		
 		if( !node.dataset.id ) {
 			while( node ) {
@@ -83,7 +86,7 @@ export default class Panel extends React.Component {
 	}
 
 	//==============================//
-	//  Methods						//
+	//  Methods											//
 	//==============================//
 	getData() {
 		this.debug( "getData" );		
@@ -109,7 +112,7 @@ export default class Panel extends React.Component {
 	//==============================//
 	renderHeader() {
 		this.debug( "renderHeader" );
-		return <div className="panel header">{this.state.header}{this.props.onAdd ? <button onClick={this.onAdd}>Add</button> : ""}</div>;
+		return <div className="header">{this.state.header}{this.props.onAdd ? <button onClick={this.onAdd}>Add</button> : ""}</div>;
 	}
 	
 	renderContent() {
@@ -121,9 +124,15 @@ export default class Panel extends React.Component {
 			content = this.state.items.map( ( item ) => {				
 				return this.renderItem( item );
 			} );			
-		}
+		}		
 				
 		return content;
+	}
+
+	renderSpaceFiller() {
+		return <div className="filler">
+			&nbsp;
+		</div>
 	}
 
 	renderItem( item ) {		
@@ -135,7 +144,7 @@ export default class Panel extends React.Component {
 		
 		return <div className="panel">
 			{this.renderHeader()}
-			<div className="panel content">
+			<div className="content">
 				{this.renderContent()}
 			</div>
 		</div>

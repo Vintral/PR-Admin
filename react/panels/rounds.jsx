@@ -24,11 +24,9 @@ export default class RoundsPanel extends Panel {
 	}
 	
 	renderItem( item ) {		
-		return <div className="container col-lg-2 col-md-3 col-sm-4 col-xs-6" key={item.id} style={{paddingBottom:"30px"}} onClick={this.onClick}>
-			<div className={"round-item" + ( item.active ? "" : " unavailable" ) } data-id={item.id}>
-				<div className="label">Round {item.id}</div>
-				<div className="date">{item.active ? this.timeUntil( item.expires ) : "" }</div>
-			</div>
+		return <div className={"round" + ( item.active ? "" : " unavailable" ) + " hover"} key={item.id} data-id={item.id} onClick={this.onClick}>			
+			<div className="label">Round {item.id}</div>
+			<div className="date">{item.active ? this.timeUntil( item.expires ) : "" }</div>			
 		</div>
 	}
 }
