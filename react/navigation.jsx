@@ -66,10 +66,13 @@ export default class NavigationMenu extends React.Component {
 			);
 		}
 		
-		return (			
-			<ul id="menu" className="menu">				
-				{menu}					
-			</ul>
+		return (
+      <div className="navigation">
+        <ul id="menu" className="menu">				
+          {menu}
+        </ul>
+        <a href="/logout" className="logout">Logout</a>
+      </div>
 		)
 	}
 	

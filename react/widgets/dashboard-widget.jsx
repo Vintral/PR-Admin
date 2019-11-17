@@ -22,16 +22,18 @@ export default class DashboardWidget extends React.Component {
 		} );
 	}
 	
-	onTick() {
+	onTick() {		
 		this.getData();
 	}
 
-	startTimer() {		
+	startTimer() {
+		console.log( "startTimer: " + this.props.refresh );		
+
 		this.stopTimer();
-		this.timer = setInterval( this.onTick, ( this.props.refresh ? this.props.refresh * 1000 : 1000 ) );
+		this.timer = setInterval( this.onTick, ( this.props.refresh ? this.props.refresh * 1000 : 1000 ) );				
 	}
 	
-	stopTimer() {
+	stopTimer() {		
 		if( this.timer )
 			clearInterval( this.timer );
 	}
@@ -45,10 +47,7 @@ export default class DashboardWidget extends React.Component {
 	}
 		
 	render() {
-		if( this.props.visible ) {
-			if( !this.state.loaded ) this.getData();
-			this.startTimer();
-		} else this.stopTimer();
+		if( !this.state.loaded ) this.getData();			
 				
 		return <div className="dashboard-stat-container col-md-2 col-sm-4 col-xs-6">
 			<div className="dashboard-stat">

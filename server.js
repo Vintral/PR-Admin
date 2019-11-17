@@ -3,6 +3,7 @@
 //==================================//
 var Logger = require( './logger' );
 const redis = require( 'redis' );
+var bcrypt = require( 'bcrypt' );
 var express = require( "express" );
 var app = express();
 var http = require('http').Server( app );
@@ -14,6 +15,7 @@ var session = require( "express-session" );
 //	Variables								//
 //==========================================//
 var port = 5523;
+let adminID = 0;
 
 //==========================================//
 //	Redis									//
@@ -47,16 +49,7 @@ redisListener.on( "message", ( channel, message ) => {
 
 const redisClient = redis.createClient( redisInfo.port, redisInfo.server );
 redisClient.on( "ready", () => {
-	let obj = {};
-	obj.test = "123";
-	obj.msg = "Hello World";
-	redisClient.publish( "USER_MESSAGE", JSON.stringify( obj ) );
-
-	obj = {};
-	obj.to = "jeffrey.heater@gmail.com";
-	obj.subject = "Email Subject";
-	obj.body = "Body of Email";
-	//redisClient.publish( "SEND_EMAIL", JSON.stringify( obj ) );
+	Logger.logServer( "Redis Ready" );  
 } );
 
 //==========================================//
@@ -78,7 +71,7 @@ function requiresSession( request, response ) {
 	return true;
 }
 
-app.use( express.static( 'public' ) );
+app.use( express.static( '/home/ec2-user/server/public' ) );
 app.use( cookies() );
 app.use( bodyParser.urlencoded( { extended: false } ) );
 app.use( bodyParser.json() );
@@ -141,9 +134,13 @@ app.get( "/dashboard/users/new", async function( request, response ) {
 app.get( "/dashboard/users/active", async function( request, response ) {
     if( requiresSession( request, response ) ) {
         //Logger.logAdmin( "Dashbord: Active Users" );
-        
-        response.write( server.totalUsers + "" );
-        response.end();
+                                
+        redisClient.get( "NUM_USERS", ( err, res ) => { 
+            //Logger.logAdmin( "CURRENT USERS: " + res ); 
+
+            response.write( res + "" );
+            response.end();
+        } );        
     }
 } );
 
@@ -504,6 +501,27 @@ app.get( "/rounds", async function( request, response ) {
         response.end();
 
         Logger.logAdmin( "rounds" );
+    }
+} );
+
+app.post( "/round", async (request, response ) => {
+    if( requiresSession( request, response ) ) {        
+        console.log( "POST ROUND DATA" );
+
+        console.log( request.body );
+
+        let { energyRegen, energyMax, gold, food, land, wood, stone, metal, length, recurring } = request.body;
+
+        let query = "INSERT INTO rounds SET energy = " + energyRegen + ", max_energy = " + energyMax + ", land = " + land + ", gold = " + gold + ", food = " + food + ", wood = " + wood + ", stone = " + stone + ", metal = " + metal + ", active = 1, expires = UNIX_TIMESTAMP() + " + ( length * 86400 ) + ", recurring = " + recurring + ", processed = 0, days = " + length;
+        let result = await database.execute( query );
+        if( result && result.affectedRows === 1 ) {
+            response.statusCode = 200;
+            response.end();
+        } else {
+            console.log( "ERROR Executing: " + query );
+            response.statusCode = 500;
+            response.end();
+        }
     }
 } );
 
@@ -1331,7 +1349,7 @@ app.get( '/', async function( request, response, next ) {
 
     var session = request.session;
     if( session && session.loggedIn ) {
-        response.sendFile( 'index.html', { root: __dirname } );
+        response.sendFile( 'index-react.html', { root: __dirname } );
     } else {
         response.redirect( '/login' );
     }

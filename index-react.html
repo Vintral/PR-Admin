@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+		<script src="https://code.jquery.com/jquery-1.12.0.js"></script>
+
+		<link rel="stylesheet" href="css/dynamic.css">
+		<link rel="stylesheet" href="css/style.css">
+
+		<script src="js/date.format.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.js"></script>
+
+		<script>
+			function showOverlay( text ) {				
+				var ov = $( '#overlay' );
+				ov.show();
+				ov.on( "click", function() { closeDetails(); } );
+			}
+
+			function hideOverlay() {
+			   $( '#overlay' ).fadeOut( 'slow' );
+			}
+		</script>
+		<title>Temp Admin</title>
+	<head>
+	<body>
+		<div id="root"></div>
+		<script src="js/bundle.js"></script>
+	</body>
+</html>
+

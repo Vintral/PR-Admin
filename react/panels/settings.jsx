@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 
 import Panel from './panel.jsx';
  
@@ -35,10 +34,8 @@ export default class SettingsPanel extends Panel {
 	}
 	
 	renderItem( item ) {		
-		return <div className={ "data-display col-lg-2 col-md-3 col-sm-6 col-xs-12 setting" + ( item.value == 0 ? " disabled" : "" ) } key={item.id} style={{paddingBottom:"30px"}} onClick={this.onClick}>
-			<div className="inner-data" data-id={item.id} data-type={item.type} data-value={item.value}>
-				<span>{item.type}</span>
-			</div>
+		return <div className={ "setting" + ( item.value == 0 ? " disabled" : "" ) + " hover" } data-id={item.id} data-type={item.type} data-value={item.value} key={item.id} onClick={this.onClick}>			
+			<span>{item.type}</span>			
 		</div>
 	}	
 }
