@@ -136,7 +136,11 @@ app.get( "/dashboard/users/active", async function( request, response ) {
         //Logger.logAdmin( "Dashbord: Active Users" );
                                 
         redisClient.get( "NUM_USERS", ( err, res ) => { 
+<<<<<<< HEAD
             //Logger.logAdmin( "CURRENT USERS: " + res ); 
+=======
+            Logger.logAdmin( "CURRENT USERS: " + res ); 
+>>>>>>> 296a18c9c150485870c4719be18e2753c65c6e01
 
             response.write( res + "" );
             response.end();
