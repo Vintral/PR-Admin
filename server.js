@@ -71,143 +71,113 @@ function requiresSession( request, response ) {
 	return true;
 }
 
+//==========================================//
+//	Redis									//
+//==========================================//
 app.use( express.static( '/home/ec2-user/server/public' ) );
 app.use( cookies() );
 app.use( bodyParser.urlencoded( { extended: false } ) );
 app.use( bodyParser.json() );
 app.use( session( { secret:'DoomToUnbelievers!', resave:false, saveUninitialized:true } ) );
 
-app.get( "/react", async function( request, response ) {
-    var session = request.session;
+function checkSession( req, res, next ) {
+    let session = req.session;
     if( session && session.loggedIn ) {
-        response.sendFile( 'index-react.html', { root: __dirname } );
-    } else {
-        response.redirect( '/login' );
-    }					
+        console.log( "NEEEEXT" );
+        next();
+    } else res.redirect( '/login' );
+}
+
+//==========================================//
+//	Endpoints								//
+//==========================================//
+app.get( "/react", [ checkSession ], async( req, res ) => {    
+    res.sendFile( 'index-react.html', { root: __dirname }, e => {
+        if( e ) Logger.logError( "ERR: " + e );
+        res.end();
+    } );
 } );
 
-app.get( "/menu", async function( request, response ) {
-    if( requiresSession( request, response ) ) {
-        Logger.logAdmin( "menu" );
-        
-        let ret = [];
+app.get( "/menu", [ checkSession ], async( req, res ) => {    
+    Logger.logAdmin( "menu" );
+    
+    let ret = [];
 
-        const contactQuery = "SELECT COUNT(id) AS total FROM contact_submissions WHERE viewed = 0";
-        const dupeQuery = "SELECT COUNT(id) AS total FROM users_dupes WHERE viewed = 0";
+    const contactQuery = "SELECT COUNT(id) AS total FROM contact_submissions WHERE viewed = 0";
+    const dupeQuery = "SELECT COUNT(id) AS total FROM users_dupes WHERE viewed = 0";
 
-        let result = await database.execute( contactQuery );
-        const contacts = result[ 0 ].total;
+    let result = await database.execute( contactQuery );
+    const contacts = result[ 0 ].total;
 
-        result = await database.execute( dupeQuery );
-        const dupes = result[ 0 ].total;
+    result = await database.execute( dupeQuery );
+    const dupes = result[ 0 ].total;
 
-        ret.push( { name: "Stats" } );
-        ret.push( { name: "Contacts", tag:contacts } );
-        ret.push( { name: "Dupes", tag:dupes } );
-        ret.push( { name: "Users" } );
-        ret.push( { name: "Rounds" } );
-        ret.push( { name: "Units" } );
-        ret.push( { name: "Buildings" } );
-        ret.push( { name: "Items" } );
-        ret.push( { name: "News" } );
-        ret.push( { name: "Rules" } );
-        ret.push( { name: "Settings" } );
-        ret.push( { name: "Theme" } );
-        ret.push( { name: "Models" } );
-        ret.push( { name: "Shoutbox" } );							
-        
-        response.write( JSON.stringify( ret ) );
+    ret.push( { name: "Stats" } );
+    ret.push( { name: "Contacts", tag:contacts } );
+    ret.push( { name: "Dupes", tag:dupes } );
+    ret.push( { name: "Users" } );
+    ret.push( { name: "Rounds" } );
+    ret.push( { name: "Units" } );
+    ret.push( { name: "Buildings" } );
+    ret.push( { name: "Items" } );
+    ret.push( { name: "News" } );
+    ret.push( { name: "Rules" } );
+    ret.push( { name: "Settings" } );
+    ret.push( { name: "Theme" } );
+    ret.push( { name: "Models" } );
+    ret.push( { name: "Shoutbox" } );							
+    
+    res.write( JSON.stringify( ret ) );
+    res.end();    
+} );
+
+app.get( "/dashboard/users/new", [ checkSession ], async( req, res ) => {        
+    const data = await database.getOne( "SELECT COUNT(id) AS total FROM users WHERE created > UNIX_TIMESTAMP() - 86400" );
+    //res.write( ( data ? data.total : "0" ) + "" );
+    res.end();
+} );
+
+app.get( "/dashboard/users/active", [ checkSession ], async( req, response ) => {
+    redisClient.get( "NUM_USERS", ( err, res ) => { 
+        Logger.logAdmin( "CURRENT USERS: " + res ); 
+
+        //response.write( res + "" );
         response.end();
-    }
+    } );
 } );
 
-app.get( "/dashboard/users/new", async function( request, response ) {
-    if( requiresSession( request, response ) ) {
-        //Logger.logAdmin( "Dashbord: New Users" );
-        
-        const data = await database.getOne( "SELECT COUNT(id) AS total FROM users WHERE created > UNIX_TIMESTAMP() - 86400" );
-        response.write( ( data ? data.total : "0" ) + "" );
-        response.end();				
-    }
+app.get( "/dashboard/users/daily", [ checkSession ], async( req, res ) => {
+    const data = await database.getOne( "SELECT COUNT(id) AS count FROM users WHERE last_seen >= UNIX_TIMESTAMP() - 86400" );
+    //res.write( ( data ? data.count : "0" ) + "" );
+    res.end();
 } );
 
-app.get( "/dashboard/users/active", async function( request, response ) {
-    if( requiresSession( request, response ) ) {
-        //Logger.logAdmin( "Dashbord: Active Users" );
-                                
-        redisClient.get( "NUM_USERS", ( err, res ) => { 
-<<<<<<< HEAD
-            //Logger.logAdmin( "CURRENT USERS: " + res ); 
-=======
-            Logger.logAdmin( "CURRENT USERS: " + res ); 
->>>>>>> 296a18c9c150485870c4719be18e2753c65c6e01
-
-            response.write( res + "" );
-            response.end();
-        } );        
-    }
+app.get( "/dashboard/chart/users/daily", [ checkSession ], async( req, res ) => {
+    const data = await database.getOne( "SELECT count FROM users_daily ORDER BY id DESC LIMIT 30" );
+    //res.write( data ? JSON.stringify( data ) : {} );
+    res.end();
 } );
 
-app.get( "/dashboard/users/daily", async function( request, response ) {
-    if( requiresSession( request, response ) ) {
-        //Logger.logAdmin( "Dashbord: Daily Users" );
-        
-        const data = await database.getOne( "SELECT COUNT(id) AS count FROM users WHERE last_seen >= UNIX_TIMESTAMP() - 86400" );
-        response.write( ( data ? data.count : "0" ) + "" );
-        response.end();				
-    }
+app.get( "/dashboard/chart/users/new", [ checkSession ], async( req, res ) => {
+    const data = await getOne( "SELECT users FROM users_daily_new ORDER BY id DESC LIMIT 30" );
+    //res.write( data ? JSON.stringify( data ) : {} );
+    res.end();    
 } );
 
-app.get( "/dashboard/chart/users/daily", async function( request, response ) {
-    if( requiresSession( request, response ) ) {
-        //Logger.logAdmin( "Dashbord: Chart Daily Users" );
-        
-        const data = await database.getOne( "SELECT count FROM users_daily ORDER BY id DESC LIMIT 30" );
-        response.write( data ? JSON.stringify( data ) : {} );
-        response.end();				
-    }
+app.get( "/dashboard/tickets", [ checkSession ], async( req, res ) => {    
+    const data = await database.getOne( "SELECT COUNT(id) AS total FROM contact_submissions WHERE time > UNIX_TIMESTAMP() - 86400" );				
+    //res.write( ( data ? data.total : "0" ) + "" );
+    res.end();    
 } );
 
-app.get( "/dashboard/chart/users/new", async function( request, response ) {
-    var session = request.session;
-    if( session && session.loggedIn ) {
-        //Logger.logAdmin( "Dashbord: Chart New Users" );
-        
-        const data = await getOne( "SELECT users FROM users_daily_new ORDER BY id DESC LIMIT 30" );
-        response.write( data ? JSON.stringify( data ) : {} );
-        response.end();				
-    }
+app.get( "/dashboard/revenue/daily", [ checkSession ], async( req, res ) => {
+    //res.write( "0" );
+    res.end();    
 } );
 
-app.get( "/dashboard/tickets", async function( request, response ) {
-    var session = request.session;
-    if( session && session.loggedIn ) {
-        //Logger.logAdmin( "Dashbord: Tickets" );
-        
-        const data = await database.getOne( "SELECT COUNT(id) AS total FROM contact_submissions WHERE time > UNIX_TIMESTAMP() - 86400" );				
-        response.write( ( data ? data.total : "0" ) + "" );
-        response.end();				
-    }
-} );
-
-app.get( "/dashboard/revenue/daily", async function( request, response ) {
-    var session = request.session;
-    if( session && session.loggedIn ) {
-        //Logger.logAdmin( "Dashbord: Daily Revenue" );
-        
-        response.write( "0" );
-        response.end();
-    }
-} );
-
-app.get( "/dashboard/revenue/monthly", async function( request, response ) {
-    var session = request.session;
-    if( session && session.loggedIn ) {
-        //Logger.logAdmin( "Dashbord: Monthly Revenue" );
-        
-        response.write( "0" );
-        response.end();
-    }
+app.get( "/dashboard/revenue/monthly", [ checkSession ], async( req, res ) => {    
+    //res.write( "0" );
+    res.end();
 } );
 
 app.get( "/contacts/:page", async function( request, response ) {
