@@ -1,0 +1,22 @@
+{
+	"folders": [
+        {
+            "path": "."
+        },
+        {
+            "path": "..\\AdminAPI"
+        },
+        {
+            "path": "..\\GameServer"
+        },
+        {
+            "path": "..\\Services"
+        },
+        {
+            "path": "..\\Client"
+        },
+        {
+            "path": "..\\Infrastructure"
+        }
+    ]
+}
