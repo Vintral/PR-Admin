@@ -42,10 +42,11 @@ class _PlayerPanelState extends State<PlayerPanel> {
         return GestureDetector(
           onTap: () { 
             print( 'TAPPED ON PLAYER' ); 
+            print( _players[ index ] );
             showDialog(
               context: context,
               builder: (_) => Dialog(
-                child: PlayerModal(),
+                child: PlayerModal( _players[ index ][ 'username' ] ),
               ),
               barrierDismissible: true,
               useRootNavigator: false,
