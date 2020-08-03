@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pocket_realm_admin/extensions/hover_extension.dart';
+import 'package:pocket_realm_admin/components/pointer.dart';
 import 'package:pocket_realm_admin/styles.dart';
 
 class NavigationItem extends StatelessWidget {
@@ -11,7 +11,7 @@ class NavigationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
+    return PointerCursor(
         child: GestureDetector(
         onTap: () { handler( text ); },
         child: Container(
@@ -25,6 +25,6 @@ class NavigationItem extends StatelessWidget {
           )
         ),
       )
-    ).showCursorOnHover;
+    );
   }
 }

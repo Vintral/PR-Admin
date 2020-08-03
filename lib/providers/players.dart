@@ -16,7 +16,7 @@ class PlayersProvider extends EventEmitter {
   //================================//
   //  Properties                    //
   //================================//
-  bool _debug = true;
+  bool _debug = false;
   bool _loading = false;
   
   DateTime _loaded;
@@ -51,6 +51,8 @@ class PlayersProvider extends EventEmitter {
     var url = 'http://dev.admin.pocketrealm.hulaplatypus.com/api/v1/players';
     var response = await http.get( url );
     
+    print( response.body );
+
     return jsonDecode( response.body );    
   }  
 

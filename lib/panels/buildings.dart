@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:pocket_realm_admin/components/pointer.dart';
 import 'package:pocket_realm_admin/config.dart';
 import 'package:pocket_realm_admin/modals/building.dart';
-import 'package:pocket_realm_admin/extensions/hover_extension.dart';
 import 'package:pocket_realm_admin/styles.dart';
 
 class BuildingsPanel extends StatefulWidget {
@@ -55,15 +55,17 @@ class _BuildingsPanelState extends State<BuildingsPanel> {
 
             if( result != null && result ) load();
           },
-          child: Card(
-            color: Colors.blue[300],
-            elevation: _buildings[ index ][ 'available' ] == 1 ? 5 : 0,
-            child: Image(
-              image: NetworkImage( 
-                Config.ImageURL + 'buildings/' + _buildings[ index ][ 'type' ] + '.png?' + Random().nextDouble().toString()                 
+          child: PointerCursor(
+            child: Card(
+              color: Colors.blue[300],
+              elevation: _buildings[ index ][ 'available' ] == 1 ? 5 : 0,
+              child: Image(
+                image: NetworkImage( 
+                  Config.ImageURL + 'buildings/' + _buildings[ index ][ 'type' ] + '.png?' + Random().nextDouble().toString()                 
+                ),
               ),
             ),
-          ).showCursorOnHover,
+          ),
         );
       }
     );
@@ -95,22 +97,24 @@ class _BuildingsPanelState extends State<BuildingsPanel> {
           )
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          var result = await showDialog(
-            context: context,
-            builder: (_) => Dialog(
-              child: BuildingModal(),
-            ),
-            barrierDismissible: true,
-            useRootNavigator: false,
-          );
+      floatingActionButton: PointerCursor(
+        child: FloatingActionButton(
+          onPressed: () async {
+            var result = await showDialog(
+              context: context,
+              builder: (_) => Dialog(
+                child: BuildingModal(),
+              ),
+              barrierDismissible: true,
+              useRootNavigator: false,
+            );
 
-          if( result != null && result ) load();
-        },
-        child: Icon( Icons.add ),
-        backgroundColor: Colors.blue,
-      ).showCursorOnHover,
+            if( result != null && result ) load();
+          },
+          child: Icon( Icons.add ),
+          backgroundColor: Colors.blue,
+        ),
+      ),
     );
   }
 }

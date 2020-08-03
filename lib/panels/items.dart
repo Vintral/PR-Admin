@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:pocket_realm_admin/components/display_item.dart';
+import 'package:pocket_realm_admin/components/pointer.dart';
 import 'package:pocket_realm_admin/config.dart';
 import 'package:pocket_realm_admin/modals/item.dart';
-import 'package:pocket_realm_admin/extensions/hover_extension.dart';
 import 'package:pocket_realm_admin/styles.dart';
 
 class ItemsPanel extends StatefulWidget {
@@ -44,26 +44,28 @@ class _ItemsPanelState extends State<ItemsPanel> {
       ),
       itemBuilder: ( context, index ) {
         print( _items[ index ][ 'available ' ] );
-        return GestureDetector(
-          onTap: () async {
-            bool result = await showDialog(
-              context: context,
-              builder: (_) => Dialog(
-                child: ItemModal( data: _items[ index ] ),
+        return PointerCursor(
+          child: GestureDetector(
+            onTap: () async {
+              bool result = await showDialog(
+                context: context,
+                builder: (_) => Dialog(
+                  child: ItemModal( data: _items[ index ] ),
+                ),
+                barrierDismissible: true,
+                useRootNavigator: false,
+              );
+
+              if( result != null && result ) load();
+            },
+
+            child: DisplayItem( 
+              available: _items[ index ][ 'available' ] == 1, 
+              child: Image(
+                image: NetworkImage( Config.ImageURL + 'items/' + _items[ index ][ 'type' ] + '.png?' + Random().nextDouble().toString() ),
               ),
-              barrierDismissible: true,
-              useRootNavigator: false,
-            );
-
-            if( result != null && result ) load();
-          },
-
-          child: DisplayItem( 
-            available: _items[ index ][ 'available' ] == 1, 
-            child: Image(
-              image: NetworkImage( Config.ImageURL + 'items/' + _items[ index ][ 'type' ] + '.png?' + Random().nextDouble().toString() ),
-            ),
-          )
+            )
+          ),
         );
       }
     );
@@ -95,22 +97,24 @@ class _ItemsPanelState extends State<ItemsPanel> {
           )
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          var result = await showDialog(
-            context: context,
-            builder: (_) => Dialog(
-              child: ItemModal(),
-            ),
-            barrierDismissible: true,
-            useRootNavigator: false,
-          );
+      floatingActionButton: PointerCursor(
+        child: FloatingActionButton(
+          onPressed: () async {
+            var result = await showDialog(
+              context: context,
+              builder: (_) => Dialog(
+                child: ItemModal(),
+              ),
+              barrierDismissible: true,
+              useRootNavigator: false,
+            );
 
-          if( result != null && result ) load();
-        },
-        child: Icon( Icons.add ),
-        backgroundColor: Colors.blue,
-      ).showCursorOnHover,
+            if( result != null && result ) load();
+          },
+          child: Icon( Icons.add ),
+          backgroundColor: Colors.blue,
+        ),
+      ),
     );
   }
 }

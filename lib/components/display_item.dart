@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:pocket_realm_admin/extensions/hover_extension.dart';
 
 class DisplayItem extends StatefulWidget {
   final Widget child;
@@ -47,7 +46,7 @@ class _DisplayItemState extends State<DisplayItem> with SingleTickerProviderStat
         color: Colors.blue[300],
         elevation: _tween.value,
         child: widget.child,
-      ).showCursorOnHover
+      )
     );
   }
 }

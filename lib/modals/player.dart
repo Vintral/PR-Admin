@@ -3,8 +3,11 @@ import 'dart:convert';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:pocket_realm_admin/extensions/hover_extension.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:pocket_realm_admin/components/pie_graph.dart';
+import 'package:pocket_realm_admin/components/pointer.dart';
 import 'package:pocket_realm_admin/config.dart';
+import 'package:pocket_realm_admin/models/chart_data.dart';
 import 'package:pocket_realm_admin/styles.dart';
 
 class PlayerModal extends StatefulWidget {
@@ -17,11 +20,13 @@ class PlayerModal extends StatefulWidget {
 }
 
 class _PlayerModalState extends State<PlayerModal> {
+  bool _debug = false;
+  
   bool _loading = true;
-  bool _loadingRound = false;
-  bool _debug = true;
+  bool _loadingRound = false;  
   dynamic data = null;
   dynamic log = null;
+  dynamic _metrics = null;
 
   bool _dupesOpened = false;
   bool _ipsOpened = false;
@@ -144,11 +149,12 @@ class _PlayerModalState extends State<PlayerModal> {
           setState( () { _loadingRound = true; } );
         }
       },
+      value: _round.toString(),
       items: rounds
       .map<DropdownMenuItem<String>>((dynamic value) {        
         return DropdownMenuItem<String>(
           value: value.toString(),
-          child: Text(value.toString()),
+          child: Text(value.toString()),          
         );
       } ).toList(),
     );
@@ -181,10 +187,29 @@ class _PlayerModalState extends State<PlayerModal> {
         );
       }
       
-      return Column(
+      return Row(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...widgets
-        ]
+          SizedBox(
+            width: 100,
+            child: Column(              
+              children: [
+                getChart( 'actions' ),
+                /*getChart( 'resources' ),
+                getChart( 'units' ),
+                getChart( 'buildings' ),*/
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                ...widgets
+              ]
+            ),
+          ),
+        ],
       );      
     }
     
@@ -199,7 +224,8 @@ class _PlayerModalState extends State<PlayerModal> {
 
   Widget getTab( String type ) {
     return Expanded(
-      child: GestureDetector(
+      child: PointerCursor(
+        child: GestureDetector(
         onTap: () => onTab( type ),
         child: Container(
           padding: EdgeInsets.all( 15 ),
@@ -209,6 +235,7 @@ class _PlayerModalState extends State<PlayerModal> {
           )
         ),
       )
+      ),
     );
   }
 
@@ -233,7 +260,10 @@ class _PlayerModalState extends State<PlayerModal> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         getTab( 'info' ),
+        VerticalDivider( width: 5,),
         getTab( 'logs' ),
+        VerticalDivider( width: 5,),
+        getTab( 'metrics' ),
       ],
     );
   }
@@ -273,7 +303,8 @@ class _PlayerModalState extends State<PlayerModal> {
     for( var i = -10; i <= 10; i++ ) {
       if( ( ( _page + i ) <= 0 ) || _page + i > _maxPages ) pages.add( Container() );
       else {
-        pages.add( GestureDetector(
+        pages.add( PointerCursor(
+          child: GestureDetector(
           onTap: () {
             print( 'TAPPED ON PAGE' );
             getRoundData( page: _page + i );
@@ -281,7 +312,7 @@ class _PlayerModalState extends State<PlayerModal> {
           child: Container(
             child: Text( ( _page + i ).toString() ),
           )
-        ).showCursorOnHover );
+        ) ) );
       }
     }
 
@@ -296,6 +327,46 @@ class _PlayerModalState extends State<PlayerModal> {
         ),
       ),
     );
+  }
+
+  Color getColor( int index ) {
+    switch( index ) {
+      case 0: return Colors.blue;
+      case 1: return Colors.yellow;
+      case 2: return Colors.green;
+      case 3: return Colors.orange;
+      case 4: return Colors.purple;
+      case 5: return Colors.red;
+      case 6: return Colors.teal;
+      case 7: return Colors.lime;
+      case 8: return Colors.amber;
+      case 9: return Colors.grey;
+    }
+
+    return Colors.black;
+  }
+
+  Widget getChart( String type, { double size = 60 } ) {
+    List<ChartData> chartData = List<ChartData>();
+
+    print( _metrics );
+    //if( data[ 'metrics' ] == null ) return Container();
+    
+    //List<dynamic> actions = data[ 'metrics' ][ 'actions' ];
+    //print( actions );
+
+    if( ( _metrics[ type ] as List<dynamic> ).length == 0 )
+      chartData.add( ChartData( '', 100, charts.ColorUtil.fromDartColor( Colors.grey ) ) );                  
+    else {
+      List<dynamic> data = _metrics[ type ] as List<dynamic>;
+      int index = 0;
+      data.forEach( ( action ) {
+        print( action );
+        chartData.add( ChartData( action[ 'type' ], int.parse( action[ 'total' ] ), charts.ColorUtil.fromDartColor( getColor( index++ ) ) ) );
+      } );
+    }
+
+    return PieGraph( data: chartData, size: size );
   }
 
   List<Widget> getDisplay() {
@@ -318,6 +389,20 @@ class _PlayerModalState extends State<PlayerModal> {
         ret.add( getPagination() );
         ret.add( SizedBox( height: 15 ) );
         break;
+      case 'metrics':
+        ret.add( getHeader( '', children: [
+          getRoundDropdown(),      
+        ] ) );
+        ret.add( SizedBox( height: 15 ) );
+        ret.add( Wrap(
+          alignment: WrapAlignment.spaceAround,
+          children: [
+            getChart( 'actions', size:350 ),
+            getChart( 'resources', size:350 ),
+            getChart( 'units', size:350 ),
+            getChart( 'buildings', size:350 ),            
+          ],
+        ) );
     }    
 
     return ret;
@@ -470,6 +555,11 @@ class _PlayerModalState extends State<PlayerModal> {
     log = jsonDecode( response.body );
     _page = log[ 'page' ];
     _maxPages = log[ 'maxPages' ];
+    _metrics = log[ 'metrics' ];
+
+    print( '=======================' );
+    print( log[ 'metrics' ] );
+    print( '=======================' );    
 
     setState( () {
       _loadingRound = false;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pocket_realm_admin/components/display_item.dart';
+import 'package:pocket_realm_admin/components/pointer.dart';
 import 'package:pocket_realm_admin/config.dart';
 import 'package:pocket_realm_admin/modals/player.dart';
 import 'package:pocket_realm_admin/providers/players.dart';
-import 'package:pocket_realm_admin/extensions/hover_extension.dart';
 import 'package:pocket_realm_admin/styles.dart';
 
 class PlayerPanel extends StatefulWidget {
@@ -39,38 +39,40 @@ class _PlayerPanelState extends State<PlayerPanel> {
         mainAxisSpacing: 10,
       ),
       itemBuilder: ( context, index ) {
-        return GestureDetector(
-          onTap: () { 
-            print( 'TAPPED ON PLAYER' ); 
-            print( _players[ index ] );
-            showDialog(
-              context: context,
-              builder: (_) => Dialog(
-                child: PlayerModal( _players[ index ][ 'username' ] ),
-              ),
-              barrierDismissible: true,
-              useRootNavigator: false,
-            );
-          },
-          child: DisplayItem(
-            child: Stack(
-              children: [
-                Image(
-                  image: NetworkImage( Config.ImageURL + 'avatars/' + _players[ index ][ 'avatar' ] + '.png' ),
+        return PointerCursor(
+          child: GestureDetector(
+            onTap: () { 
+              print( 'TAPPED ON PLAYER' ); 
+              print( _players[ index ] );
+              showDialog(
+                context: context,
+                builder: (_) => Dialog(
+                  child: PlayerModal( _players[ index ][ 'username' ] ),
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    height: 30,
-                    color: Colors.black.withOpacity( 0.5 ),
-                    child: Center(                      
-                      child: Text( _players[ index ][ 'username' ] ),
-                    )
+                barrierDismissible: true,
+                useRootNavigator: false,
+              );
+            },
+            child: DisplayItem(
+              child: Stack(
+                children: [
+                  Image(
+                    image: NetworkImage( Config.ImageURL + 'avatars/' + _players[ index ][ 'avatar' ] + '.png' ),
                   ),
-                )
-              ],
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      height: 30,
+                      color: Colors.black.withOpacity( 0.5 ),
+                      child: Center(                      
+                        child: Text( _players[ index ][ 'username' ] ),
+                      )
+                    ),
+                  )
+                ],
+              )
             )
-          )
+          ),
         );
       }
     );
