@@ -4,6 +4,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:pocket_realm_admin/components/ip.dart';
 import 'package:pocket_realm_admin/components/pie_graph.dart';
 import 'package:pocket_realm_admin/components/pointer.dart';
 import 'package:pocket_realm_admin/config.dart';
@@ -31,6 +32,11 @@ class _PlayerModalState extends State<PlayerModal> {
   bool _dupesOpened = false;
   bool _ipsOpened = false;
   bool _logsOpened = false;
+
+  int _banAmount = 0;
+  String _banReason = "";
+  String _banUnit = "";
+  String _banType = "";
 
   int _page;
   int _maxPages;
@@ -191,17 +197,6 @@ class _PlayerModalState extends State<PlayerModal> {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 100,
-            child: Column(              
-              children: [
-                getChart( 'actions' ),
-                /*getChart( 'resources' ),
-                getChart( 'units' ),
-                getChart( 'buildings' ),*/
-              ],
-            ),
-          ),
           Expanded(
             child: Column(
               children: [
@@ -210,26 +205,35 @@ class _PlayerModalState extends State<PlayerModal> {
             ),
           ),
         ],
-      );      
+      );
     }
     
     return Container();
   }
 
   void onTab( String type ) {
+    if( type == 'metrics' && _round == "0" ) return;
+    if( type == _tab ) return;
+
     setState( () {
       _tab = type;
     } );
   }
 
   Widget getTab( String type ) {
+    Color color = type == _tab ? Colors.lightBlue[ 300 ] : Colors.lightBlue[ 100 ];
+    if( type == 'metrics' && _round == "0" ) color = Colors.grey;
+
     return Expanded(
       child: PointerCursor(
         child: GestureDetector(
         onTap: () => onTab( type ),
         child: Container(
           padding: EdgeInsets.all( 15 ),
-          color: type == _tab ? Colors.lightBlue[ 300 ] : Colors.lightBlue[ 100 ],
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.only( topLeft:Radius.circular( 10 ), topRight:Radius.circular( 10 ) ),
+          ),
           child: Center(
             child: Text( type, style:PRStyles.HeaderText ),
           )
@@ -259,11 +263,13 @@ class _PlayerModalState extends State<PlayerModal> {
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
+        VerticalDivider( width: 5,),
         getTab( 'info' ),
         VerticalDivider( width: 5,),
         getTab( 'logs' ),
         VerticalDivider( width: 5,),
         getTab( 'metrics' ),
+        VerticalDivider( width: 5,),
       ],
     );
   }
@@ -272,9 +278,7 @@ class _PlayerModalState extends State<PlayerModal> {
     List<Widget> widgets = List<Widget>();
     List<dynamic> ips = data[ 'ips' ] as List<dynamic>;
 
-    ips.forEach( ( ip ) {
-      widgets.add( Text( ip[ 'ip' ] ) );
-    } );
+    ips.forEach( ( ip ) { widgets.add( IPItem( ip[ 'ip' ] ) ); } );
     
     return AnimatedContainer(
       duration: Duration( milliseconds: 200 ),      
@@ -283,8 +287,8 @@ class _PlayerModalState extends State<PlayerModal> {
         width: double.infinity,
         child: Wrap(     
           alignment: WrapAlignment.start,
-          spacing: 10,
-          runSpacing: 10,        
+          spacing: 0,
+          runSpacing: 0,
           children: [
             ...widgets
           ],
@@ -346,27 +350,111 @@ class _PlayerModalState extends State<PlayerModal> {
     return Colors.black;
   }
 
-  Widget getChart( String type, { double size = 60 } ) {
+  Widget getChart( String type, { double size = 100, bool showLabels = true } ) {
     List<ChartData> chartData = List<ChartData>();
 
-    print( _metrics );
-    //if( data[ 'metrics' ] == null ) return Container();
-    
-    //List<dynamic> actions = data[ 'metrics' ][ 'actions' ];
-    //print( actions );
-
-    if( ( _metrics[ type ] as List<dynamic> ).length == 0 )
+    if( _metrics[ type ] as List<dynamic> == null || ( _metrics[ type ] as List<dynamic> ).length == 0 )
       chartData.add( ChartData( '', 100, charts.ColorUtil.fromDartColor( Colors.grey ) ) );                  
     else {
       List<dynamic> data = _metrics[ type ] as List<dynamic>;
       int index = 0;
-      data.forEach( ( action ) {
-        print( action );
-        chartData.add( ChartData( action[ 'type' ], int.parse( action[ 'total' ] ), charts.ColorUtil.fromDartColor( getColor( index++ ) ) ) );
+      if( data != null ) data.forEach( ( action ) {        
+        chartData.add( ChartData( action[ 'type' ], int.parse( action[ 'total' ].toString() ), charts.ColorUtil.fromDartColor( getColor( index++ ) ) ) );
       } );
     }
 
-    return PieGraph( data: chartData, size: size );
+    return PieGraph( data: chartData, size: size, showLabels: showLabels, );
+  }
+
+  Widget getBanForm() {
+    debug( "getBanForm" );
+
+    return Padding(
+      padding: EdgeInsets.all( 15 ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Reason',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: ( value ) {
+                _banReason = value;
+              },
+              initialValue: "",
+            ),
+          ),
+          SizedBox( width: 15 ),
+          SizedBox(
+            width: 100,
+            child: TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Amount',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: ( value ) {
+                _banAmount = int.parse( value, onError: (_) => _banAmount = 0 );
+              },              
+              enabled: _banUnit != "Permanent",
+            ),
+          ),
+          SizedBox( width: 15 ),
+          Container(
+            padding: EdgeInsets.symmetric( vertical: 5, horizontal: 10 ),
+            color: Colors.white,
+            child: DropdownButton(
+              onChanged: ( value ) {
+                _banUnit = value;
+                if( value == "Permanent" ) _banAmount = -1;
+                setState( () {} );
+              },
+              underline: Container(),
+              value: _banUnit,
+              items: [ "", "Minutes", "Hours", "Days", "Permanent" ]
+                .map<DropdownMenuItem< String > >( ( dynamic value ) {
+                  return DropdownMenuItem< String >(
+                    value: value.toString(),
+                    child: Text( value.toString(), style: TextStyle( color: Colors.black ) ),
+                  );
+                } ).toList(),
+            ),
+          ),
+          SizedBox( width: 15 ),
+          Container(
+            padding: EdgeInsets.symmetric( vertical: 5, horizontal: 10 ),
+            color: Colors.white,
+            child: DropdownButton(
+              onChanged: ( value ) {
+                _banType = value;                
+                setState( () {} );
+              },
+              underline: Container(),
+              value: _banType,
+              items: [ "", "Game", "Shoutbox" ]
+                .map<DropdownMenuItem< String > >( ( dynamic value ) {
+                  return DropdownMenuItem< String >(
+                    value: value.toString(),
+                    child: Text( value.toString(), style: TextStyle( color: Colors.black ) ),
+                  );
+                } ).toList(),
+            ),
+          ),
+          SizedBox( width: 15 ),
+          RaisedButton(
+            onPressed: () async {
+              if( _banReason == "" ) return;
+              if( _banAmount == 0 ) return;
+              if( _banType == "" ) return;
+              if( _banUnit == "" ) return;
+
+              await sendBan();
+            },
+            child: Text( "BAN" )
+          )
+        ],
+      ),
+    );
   }
 
   List<Widget> getDisplay() {
@@ -379,6 +467,8 @@ class _PlayerModalState extends State<PlayerModal> {
         ret.add( SizedBox( height: 15 ) );
         ret.add( getHeader( 'IPs' ) );
         ret.add( getIPs() );
+        ret.add( getHeader( 'Ban' ) );
+        ret.add( getBanForm() );
         break;
       case 'logs':
         ret.add( getHeader( '', children: [
@@ -531,6 +621,31 @@ class _PlayerModalState extends State<PlayerModal> {
     print( data );
     _page = data[ 'page' ];
     _maxPages = data[ 'pages' ];
+  }
+
+  Future<dynamic> sendBan() async {
+    print( "sendBan" );
+
+    var url = "http://dev.admin.pocketrealm.hulaplatypus.com/api/v1/player/" + widget.username + "/ban";
+    var response = await http.post( 
+      url,
+      body: {
+        "reason": _banReason,
+        "amount": _banAmount.toString(),
+        "unit": _banUnit,
+        "type": _banType,
+      }
+    );
+
+    print( response.body );
+    print( response.statusCode.toString() );
+
+    //data = jsonDecode( response.body );
+    //print( data );
+
+    setState( () {
+      //_loading = false;
+    } );
   }
 
   Future<dynamic> load() async {    

@@ -5,8 +5,9 @@ import 'package:pocket_realm_admin/models/chart_data.dart';
 class PieGraph extends StatelessWidget {
   final List<ChartData> data;
   final double size;
+  final bool showLabels;
 
-  PieGraph({@required this.data, this.size = 100});
+  PieGraph({@required this.data, this.size = 100, this.showLabels = true });
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,7 @@ class PieGraph extends StatelessWidget {
         animate:true,
         defaultRenderer: charts.ArcRendererConfig(
           arcWidth: size ~/ 2,
-          arcRendererDecorators: [ charts.ArcLabelDecorator() ],
+          arcRendererDecorators: [ showLabels ? charts.ArcLabelDecorator() : "" ],
         ),
       )
     );
