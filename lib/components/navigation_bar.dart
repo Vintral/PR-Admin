@@ -42,6 +42,8 @@ class _NavigationBarState extends State<NavigationBar> {
           NavigationItem( 'buildings', onTap,  _tab ),
           Divider(color: Colors.blue[300], height: 2, ),
           NavigationItem( 'items', onTap,  _tab ),
+          Divider(color: Colors.blue[300], height: 2, ),
+          NavigationItem( 'contacts', onTap,  _tab ),
         ]
       )
     );  

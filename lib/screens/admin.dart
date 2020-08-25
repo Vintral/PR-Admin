@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pocket_realm_admin/components/navigation_bar.dart';
 import 'package:pocket_realm_admin/panels/buildings.dart';
+import 'package:pocket_realm_admin/panels/contacts.dart';
 import 'package:pocket_realm_admin/panels/items.dart';
 import 'package:pocket_realm_admin/panels/players.dart';
 import 'package:pocket_realm_admin/panels/units.dart';
@@ -28,6 +29,7 @@ class _AdminPageState extends State<AdminPage> {
       case 'units': return UnitsPanel();
       case 'buildings': return BuildingsPanel();
       case 'items': return ItemsPanel();
+      case 'contacts': return ContactsPanel();
     }
 
     return Container();
